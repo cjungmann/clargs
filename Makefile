@@ -9,6 +9,11 @@ CFLAGS = -Wall -Werror -m64 -ggdb -I. -fPIC -shared
 
 CC = cc
 
+define install_man_pages
+	cp clargs.3  /usr/share/man/man3
+	gzip -f /usr/share/man/man3/clargs.3
+endef
+
 libclargs.so: clargs.c clargs.h
 	$(CC) ${LIB_CFLAGS} -o libclargs.so clargs.c
 
@@ -19,11 +24,12 @@ debug:
 install:
 	install -D --mode=755 libclargs.so /usr/lib
 	install -D --mode=775 clargs.h     /usr/local/include
+	$(call install_man_pages)
 
 uninstall:
 	rm -f /usr/lib/libclargs.so
 	rm -f /usr/local/include/clargs.h
-
+	rm -f /usr/share/man/man3/clargs.3.gz
 
 clean:
 	rm -f libclargs.so libclargsd.so test
