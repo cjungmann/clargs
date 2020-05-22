@@ -7,10 +7,10 @@ int cflag = 0;
 int show_help = 0;
 
 DefLine defs[] = {
-   { 'h', "Show this help", &show_help, NULL },
-   { 'v', "Set an integer value.", &intval, clargs_set_int },
-   { 'f', "Set filename.", &filename, clargs_set_string },
-   { 'c', "Set c flag.", &cflag, NULL },
+   { 'h', "Show this help.",       &show_help, NULL },
+   { 'v', "Set an integer value.", &intval,    clargs_set_int },
+   { 'f', "Set filename.",         &filename,  clargs_set_string },
+   { 'c', "Set c flag.",           &cflag,     NULL },
    { '\0', "", NULL, NULL }
 };
 
