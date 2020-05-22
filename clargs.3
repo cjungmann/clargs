@@ -1,0 +1,58 @@
+.TH clargs 3 "21 May 2020" "Linux"
+.SH NAME
+CLARGS - Simple Command Line Arguments Processor
+
+.SH SYNOPSIS
+.nf   # no filling output lines
+.TP
+.B #include <clargs.h>
+.PP
+.BI "void clargs_show(" "const DefLine *options" )
+.BI "void clargs_process(const DefLine *" options ", int " argc ",  const char **" argv )
+.BI "void clargs_set_int(const DefLine *" option ", const char *" value )
+.BI "void clargs_set_string(const DefLine *" option ", const char *" value )
+.fi   # fill output lines (undo .nf above)
+
+.SH DESCRIPTION
+The
+.BR clargs_show() ,
+.BR clargs_process() ,
+.BR clargs_set_int() ,
+and
+.BR clargs_set_string()
+functions all take a pointer to a
+.I DefLine
+structure.
+.PP
+.in +4n   # indent the example
+.EX
+typedef struct _clarg_def_line
+{
+   char       letter;
+   const char *help;
+   void       *target;
+   ClargSet   setfunc;
+} DefLine;
+.EE
+.in       # return to unindented
+.PP
+The members of the
+.I DefLine
+structure are:
+.TP
+.I letter
+The letter that, when following a dash on the argument list,
+introduces an option.
+.TP
+.I help
+A string that will be used when displaying the arguments
+help information.
+.TP
+.I target
+A void pointer to a variable in which the option's value
+will be set.
+.TP
+.I setfunc
+A pointer to a function that executes the option.
+
+.SH EXAMPLE
