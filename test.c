@@ -11,7 +11,7 @@ DefLine defs[] = {
    { 'v', "Set an integer value.", &intval,    clargs_set_int },
    { 'f', "Set filename.",         &filename,  clargs_set_string },
    { 'c', "Set c flag.",           &cflag,     NULL },
-   { '\0', "", NULL, NULL }
+   CLARGS_END_DEF
 };
 
 int main(int argc, const char **argv)

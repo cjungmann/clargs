@@ -12,6 +12,8 @@ typedef struct _clarg_def_line
    ClargSet   setfunc;    // optional function pointer to process the option value
 } DefLine;
 
+#define CLARGS_END_DEF {'\0',NULL,NULL,NULL}
+
 void clargs_set_int(const DefLine *option, const char *value);
 void clargs_set_string(const DefLine *option, const char *value);
 
