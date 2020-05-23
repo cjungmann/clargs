@@ -3,28 +3,32 @@
 CLARGS - Simple Command Line Arguments Processor
 
 .SH SYNOPSIS
-.nf   # no filling output lines
-.TP
 .B #include <clargs.h>
-.PP
-.BI "void clargs_show(" "const DefLine *options" )
+.TP
 .BI "void clargs_process(const DefLine *" options ", int " argc ",  const char **" argv )
+Reads each command line option and applies an action according to the
+.BR options " argument."
+.TP
 .BI "void clargs_set_int(const DefLine *" option ", const char *" value )
+Built-in function that sets the target variable to the option's integer value.
+.TP
 .BI "void clargs_set_string(const DefLine *" option ", const char *" value )
-.fi   # fill output lines (undo .nf above)
+Built-in function that sets the target variable to the option's string value.
+.TP
+.BI "void clargs_show(const DefLine *" "options" )
+Writes out each option letter with its help string.
 
 .SH DESCRIPTION
-The
-.BR clargs_show() ,
-.BR clargs_process() ,
-.BR clargs_set_int() ,
-and
-.BR clargs_set_string()
-functions all take a pointer to a
-.I DefLine
-structure.
+.SS Typedefs
 .PP
-.in +4n   # indent the example
+The
+.I DefLine
+struct defines an activator, action, and hint string for
+a command line option.  A program will define an array of
+these structs to inform the
+.BR clargs " operattion."
+.PP
+.in +4n
 .EX
 typedef struct _clarg_def_line
 {
@@ -34,25 +38,229 @@ typedef struct _clarg_def_line
    ClargSet   setfunc;
 } DefLine;
 .EE
-.in       # return to unindented
+.in
 .PP
 The members of the
 .I DefLine
 structure are:
-.TP
+.in +4n
+.TP 8
 .I letter
 The letter that, when following a dash on the argument list,
 introduces an option.
-.TP
+.TP 8
 .I help
 A string that will be used when displaying the arguments
 help information.
-.TP
+.TP 8
 .I target
 A void pointer to a variable in which the option's value
-will be set.
-.TP
+will be set.  This may be NULL if the
 .I setfunc
-A pointer to a function that executes the option.
+function is called without arguments.
+.TP 8
+.I setfunc
+A pointer to a function that executes the option.  If there
+is a
+.I target
+value set, the function should cast the variable
+appropriately and manipulate the environment according
+to the intent of the option.
+
+There are two built-in functions that work as
+.I setfunc
+functions:
+.B clargs_set_int()
+and
+.BR clargs_set_string() .
+Read about them below.
+.in
+.\"
+.TP 4
+.BI "typedef void (*ClargSet)(const DefLine *" option ", const char *" value )
+describes the signature of a function that can be used in the
+.IR setfunc " member of the " DefLine " struct.  The functions"
+.BR clargs_set_int "() and " clargs_set_string ()
+are examples of this type of function.
+
+.SS Functions
+.\"
+.\" Function definition: clargs_process()
+.TP 4
+.BI "void clargs_process(const DefLine *" options ", int " argc ",  const char **" argv )
+This function is meant to be called from
+.BR main() ,
+passing in the
+.IR argc " and " argv " arguments."
+.\" indent arguments documentation
+.RS
+.TP 8
+.I options
+is a pointer to the first of an array of
+.BR DefLine s
+structs.  The last element of the
+.I options
+array should be an element with the
+.I letter
+value set to '\\0'.
+.TP 8
+.I argc
+The number of arguments in the 
+.I argv
+parameter.  Meant to be passed directly from the
+.B main()
+arguments.P
+.TP 8
+.I argv
+Pointer to an array of string pointers, on element
+for each argument.   Meant to be passed directly from the
+.B main()
+arguments.  Note: the first argument on
+.I argv
+is ignored because it would be the command name if the
+values originate from a commandline call.
+.RE
+.\"
+.\" Function definitions: clargs_set_int() and clargs_set_string()
+.TP 4
+.BI "void clargs_set_int(const DefLine *" option ", const char *" value )
+.TQ
+.BI "void clargs_set_string(const DefLine *" option ", const char *" value )
+These functions, when used in a
+.I DefLine
+definition, will be called by 
+.BR clargs_process ()
+when the option is matched.  It will cast the
+.I target
+element to
+.BR int " or " string ,
+according to its name, and set the 
+.I target 
+to the argument value.
+.RS
+.TP 8
+.I option
+is a pointer to the matching
+.I DefLine
+struct.  It is through this pointer that the function can access
+the void pointer.
+.TP 8
+.I value
+The string value of the argument following the option flag.
+.RE
+.\"
+.\" Function definitions: clargs_set_int() and clargs_set_string()
+.TP 4
+.BI "void clargs_show(" "const DefLine *options" )
+This function uses the
+.I options
+array to print a simple help message for each option.
+The output of this function can be used to add this simple
+information in a longer help message.
+.RS
+.TP 8
+.I options
+is a pointer to the array of
+.I DefLine
+structs.
+.RE
 
 .SH EXAMPLE
+.SS DefLine Examples
+.TP
+DefLine dl = { 'i', "Set integer value.", &intval, clargs_set_int };
+This is the usual case.  When an \fI-i\fR argument is detected,
+the argument following the \fI-i\fR will be saved using the
+\fBclargs_set_int\fR function that will be called to process
+the variable \fBintval\fR.
+
+.TP
+DefLine dl = { 'h', "Show this help.",  &bShowHelp, NULL };
+For options that do not take a value, this \fIDefLine\fR does
+not define a \fBsetfunc\fR function, the \fBtarget\fR variable,
+\fBbShowHelp\fR is assumed to be an integer.  \fBbShowHelp\fR
+will be cast to \fIint\fR and set to 1.
+
+.SS C Program
+.nf
+.EX
+// file: demo.c
+// make: cc -o demo demo.c -lclargs
+#include <stdio.h>
+#include <clargs.h>
+#include <string.h>
+
+void dayname_set(const DefLine *option, const char *value);
+
+const char *DayNames[] =
+{
+   "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" 
+};
+
+// Target variables for DefLines
+int  intval = 0;
+char *strval = NULL;
+int  bflag = 0;
+int  bShowHelp = 0;
+int  dayOfWeek = -1;
+
+DefLine defs[] = {
+   { 'h', "Show this help.",    &bShowHelp, NULL },
+   { 'i', "Set integer value.", &intval,    clargs_set_int },
+   { 's', "Set string value.",  &strval,    clargs_set_string },
+   { 'f', "Set flag.",          &bflag,     NULL },
+   { 'd', "Set day of week.",   &dayOfWeek, dayname_set },
+   CLARGS_END_DEF
+};
+
+void show_values(void)
+{
+   printf("intval = %d\n", intval);
+   printf("strval = %s\n", strval);
+   printf("bflag  = %d\n", bflag);
+
+   if (dayOfWeek >= 0 && dayOfWeek < 7)
+      printf("dayOfWeek is %s (%d).\n",
+             DayNames[dayOfWeek],
+             dayOfWeek);
+   else
+      printf("Unknown day name.\n");
+}
+
+// Example of custom setfunc function
+void dayname_set(const DefLine *option, const char *value)
+{
+   if (!strcasecmp(value, "SUN"))
+      dayOfWeek = 0;
+   else if (!strcasecmp(value, "MON"))
+      dayOfWeek = 1;
+   else if (!strcasecmp(value, "TUE"))
+      dayOfWeek = 2;
+   else if (!strcasecmp(value, "WED"))
+      dayOfWeek = 3;
+   else if (!strcasecmp(value, "THU"))
+      dayOfWeek = 4;
+   else if (!strcasecmp(value, "FRI"))
+      dayOfWeek = 5;
+   else if (!strcasecmp(value, "SAT"))
+      dayOfWeek = 6;
+   else
+      dayOfWeek = -1;
+}
+
+int main(int argc, const char **argv)
+{
+   clargs_process(defs, argc, argv);
+
+   if (bShowHelp)
+   {
+      printf("The following options are available:\n");
+      clargs_show(defs);
+   }
+   else
+      show_values();
+   
+   return 0;
+}
+.EE
+.fi
