@@ -60,10 +60,9 @@ will be set.  This may be NULL if the
 function is called without arguments.
 .TP 8
 .I setfunc
-A pointer to a function that executes the option.  If there
-is a
+A pointer to a function that executes the option.  If
 .I target
-value set, the function should cast the variable
+is not NULL, the function should cast the variable
 appropriately and manipulate the environment according
 to the intent of the option.
 
