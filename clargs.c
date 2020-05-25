@@ -75,8 +75,13 @@ void clargs_process(const DefLine *options, int argc, const char **argv)
             {
                if (option->setfunc)
                {
-                  setfunc = option->setfunc;
-                  break;
+                  if (option->target)
+                  {
+                     setfunc = option->setfunc;
+                     break;
+                  }
+                  else
+                     (*option->setfunc)(option, NULL);
                }
                else
                   *(int*)option->target = 1;
