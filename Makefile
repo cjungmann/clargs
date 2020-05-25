@@ -26,8 +26,13 @@ install:
 	install -D --mode=775 clargs.h     /usr/local/include
 	$(call install_man_pages)
 
+debug-install:
+	$(CC) ${LIB_DBFLAGS} -o libclargsd.so clargs.c
+	install -D --mode=755 libclargsd.so /usr/lib
+
 uninstall:
 	rm -f /usr/lib/libclargs.so
+	rm -f /usr/lib/libclargsd.so
 	rm -f /usr/local/include/clargs.h
 	rm -f /usr/share/man/man3/clargs.3.gz
 
