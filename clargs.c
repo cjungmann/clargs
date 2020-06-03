@@ -4,6 +4,8 @@
 
 #include "clargs.h"
 
+#define EXPORT __attribute__((visibility("default")))
+
 int intval = 0;
 const char *filename="/var/log/syslog";
 
@@ -26,7 +28,7 @@ const DefLine *seek_option(const DefLine *options, char letter)
    return NULL;
 }
 
-void clargs_show(const DefLine *options)
+EXPORT void clargs_show(const DefLine *options)
 {
    const DefLine *ptr = options;
    while (ptr->letter)
@@ -36,17 +38,17 @@ void clargs_show(const DefLine *options)
    }
 }
 
-void clargs_set_int(const DefLine *option, const char *value)
+EXPORT void clargs_set_int(const DefLine *option, const char *value)
 {
    *((int*)option->target) = atoi(value);
 }
 
-void clargs_set_string(const DefLine *option, const char *value)
+EXPORT void clargs_set_string(const DefLine *option, const char *value)
 {
    *((const char **)option->target) = value;
 }
 
-void clargs_process(const DefLine *options, int argc, const char **argv)
+EXPORT void clargs_process(const DefLine *options, int argc, const char **argv)
 {
    // The initial value won't be used due to prefix increment in while loop
    const char **ptr = argv;

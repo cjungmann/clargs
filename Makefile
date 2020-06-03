@@ -1,5 +1,5 @@
 BASEFLAGS = -Wall -Werror -m64
-LIB_CFLAGS = ${BASEFLAGS} -I. -fPIC -shared
+LIB_CFLAGS = ${BASEFLAGS} -I. -fPIC -shared -fvisibility=hidden
 LIB_DBFLAGS = ${LIB_CFLAGS} -ggdb
 
 # Allow program to link to local library
